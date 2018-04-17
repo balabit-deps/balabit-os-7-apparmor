@@ -1,0 +1,20 @@
+From: Rene Engelhard <rene@rene-engelhard.de>
+Date: Sat, 20 Jan 2018 23:54:08 +0100
+Subject: [PATCH] abstractions/gnupg: allow pubring.kbx
+
+---
+ profiles/apparmor.d/abstractions/gnupg | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/profiles/apparmor.d/abstractions/gnupg b/profiles/apparmor.d/abstractions/gnupg
+index f976f02..d04c920 100644
+--- a/profiles/apparmor.d/abstractions/gnupg
++++ b/profiles/apparmor.d/abstractions/gnupg
+@@ -4,6 +4,7 @@
+   # user configurations
+   owner @{HOME}/.gnupg/options     r,
+   owner @{HOME}/.gnupg/pubring.gpg r,
++  owner @{HOME}/.gnupg/pubring.kbx r,
+   owner @{HOME}/.gnupg/random_seed rw,
+   owner @{HOME}/.gnupg/secring.gpg r,
+   owner @{HOME}/.gnupg/so/*.x86_64 mr,

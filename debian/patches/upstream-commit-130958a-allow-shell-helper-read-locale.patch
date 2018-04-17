@@ -1,0 +1,72 @@
+From 2bc64070c9b329546ea3b35968044efdf9451028 Mon Sep 17 00:00:00 2001
+From: Tyler Hicks <tyhicks@canonical.com>
+Date: Thu, 8 Mar 2018 10:08:13 +0000
+Subject: [PATCH] tests: Allow shell helper test read the locale
+
+The environ.sh test fails with the following fatal error:
+
+  Fatal Error (environ): Unable to run test sub-executable
+
+The reason is due to the tests which use the env_check.sh helper see
+unexpected output in the helper's output:
+
+  /bin/bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
+
+I see a number of locale related denials:
+
+apparmor="DENIED" operation="open" profile="/aa/tests/regression/apparmor/env_check.sh" name="/usr/lib/locale/locale-archive" pid=738 comm="env_check.sh" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+apparmor="DENIED" operation="open" profile="/aa/tests/regression/apparmor/env_check.sh" name="/etc/locale.alias" pid=738 comm="env_check.sh" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+apparmor="DENIED" operation="open" profile="/aa/tests/regression/apparmor/env_check.sh" name="/usr/lib/locale/C.UTF-8/LC_IDENTIFICATION" pid=738 comm="env_check.sh" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+apparmor="DENIED" operation="open" profile="/aa/tests/regression/apparmor/env_check.sh" name="/usr/lib/locale/C.UTF-8/LC_CTYPE" pid=738 comm="env_check.sh" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+apparmor="DENIED" operation="open" profile="/aa/tests/regression/apparmor/env_check.sh" name="/usr/lib/locale/C.UTF-8/LC_COLLATE" pid=738 comm="env_check.sh" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+apparmor="DENIED" operation="open" profile="/aa/tests/regression/apparmor/env_check.sh" name="/usr/lib/locale/C.UTF-8/LC_MESSAGES/" pid=738 comm="env_check.sh" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+apparmor="DENIED" operation="open" profile="/aa/tests/regression/apparmor/env_check.sh" name="/usr/lib/locale/C.UTF-8/LC_NUMERIC" pid=738 comm="env_check.sh" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+apparmor="DENIED" operation="open" profile="/aa/tests/regression/apparmor/env_check.sh" name="/usr/lib/locale/C.UTF-8/LC_TIME" pid=738 comm="env_check.sh" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+
+Allowing everything under /usr/lib/locale/ to be read by the helper
+results in the environ.sh test passing.
+
+Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+---
+ tests/regression/apparmor/environ.sh | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/tests/regression/apparmor/environ.sh b/tests/regression/apparmor/environ.sh
+index 3738182..60ae165 100644
+--- a/tests/regression/apparmor/environ.sh
++++ b/tests/regression/apparmor/environ.sh
+@@ -22,6 +22,7 @@ bin=$pwd
+ helper=$pwd/env_check
+ setuid_helper=${tmpdir}/env_check
+ helper_sh=$pwd/env_check.sh
++read_locale="/usr/lib/locale/**:r"
+ 
+ # TEST environment filtering on elf binaries
+ genprofile $helper:ux
+@@ -61,19 +62,19 @@ genprofile ${helper_sh}:Ux
+ runchecktest "ENVIRON (shell script): Ux & regular env" pass ${helper_sh} FOO=BAR
+ runchecktest "ENVIRON (shell script): Ux & sensitive env" fail ${helper_sh} LD_LIBRARY_PATH=.
+ 
+-genprofile ${helper_sh}:px -- image=${helper_sh}
++genprofile ${helper_sh}:px -- image=${helper_sh} "$read_locale"
+ runchecktest "ENVIRON (shell script): px & regular env" pass ${helper_sh} FOO=BAR
+ runchecktest "ENVIRON (shell script): px & sensitive env" pass ${helper_sh} LD_LIBRARY_PATH=.
+ 
+-genprofile ${helper_sh}:Px -- image=${helper_sh}
++genprofile ${helper_sh}:Px -- image=${helper_sh} "$read_locale"
+ runchecktest "ENVIRON (shell script): Px & regular env" pass ${helper_sh} FOO=BAR
+ runchecktest "ENVIRON (shell script): Px & sensitive env" fail ${helper_sh} LD_LIBRARY_PATH=.
+ 
+-genprofile addimage:${helper_sh}
++genprofile addimage:${helper_sh} "$read_locale"
+ runchecktest "ENVIRON (shell script): ix & regular env" pass ${helper_sh} FOO=BAR
+ runchecktest "ENVIRON (shell script): ix & sensitive env" pass ${helper_sh} LD_LIBRARY_PATH=.
+ 
+-genprofile image=${helper_sh}
++genprofile image=${helper_sh} "$read_locale"
+ runchecktest "ENVIRON (shell script): unconfined --> confined & regular env" pass ${helper_sh} FOO=BAR
+ runchecktest "ENVIRON (shell script): unconfined --> confined & sensitive env" pass ${helper_sh} LD_LIBRARY_PATH=.
+ 
+-- 
+2.7.4
+

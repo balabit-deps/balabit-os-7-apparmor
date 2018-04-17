@@ -1,0 +1,64 @@
+From: Debian AppArmor Team <pkg-apparmor-team@lists.alioth.debian.org>
+Date: Mon, 29 Jan 2018 12:26:43 +0000
+Subject: flatpak-exports
+
+Origin: https://code.launchpad.net/~intrigeri/apparmor/flatpak-exports/+merge/331056
+=== modified file 'profiles/apparmor.d/abstractions/freedesktop.org'
+---
+ profiles/apparmor.d/abstractions/freedesktop.org | 30 +++++++++++++-----------
+ 1 file changed, 16 insertions(+), 14 deletions(-)
+
+diff --git a/profiles/apparmor.d/abstractions/freedesktop.org b/profiles/apparmor.d/abstractions/freedesktop.org
+index 972d5cb..e052ce8 100644
+--- a/profiles/apparmor.d/abstractions/freedesktop.org
++++ b/profiles/apparmor.d/abstractions/freedesktop.org
+@@ -10,10 +10,10 @@
+ # ------------------------------------------------------------------
+ 
+   # system configuration
+-  /usr/{,local/}share/applications/{*/,}               r,
+-  /usr/{,local/}share/applications/{*/,}defaults.list  r,
+-  /usr/{,local/}share/applications/{*/,}mimeinfo.cache r,
+-  /usr/{,local/}share/applications/{*/,}*.desktop      r,
++  /{usr,usr/local,var/lib/flatpak/exports}/share/applications/{*/,}               r,
++  /{usr,usr/local,var/lib/flatpak/exports}/share/applications/{*/,}defaults.list  r,
++  /{usr,usr/local,var/lib/flatpak/exports}/share/applications/{*/,}mimeinfo.cache r,
++  /{usr,usr/local,var/lib/flatpak/exports}/share/applications/{*/,}*.desktop      r,
+   /usr/share/icons/               r,
+   /usr/share/icons/**             r,
+   /usr/share/pixmaps/             r,
+@@ -22,9 +22,11 @@
+   /usr/local/share/icons/**             r,
+   /usr/local/share/pixmaps/             r,
+   /usr/local/share/pixmaps/**           r,
++  /var/lib/flatpak/exports/share/icons/   r,
++  /var/lib/flatpak/exports/share/icons/** r,
+ 
+   # this should probably go elsewhere
+-  /usr/share/mime/**              r,
++  /{usr,var/lib/flatpak/exports}/share/mime/** r,
+ 
+   # per-user configurations
+   owner @{HOME}/.icons/                 r,
+@@ -32,12 +34,12 @@
+   owner @{HOME}/.local/share/recently-used.xbel* rw,
+   owner @{HOME}/.config/user-dirs.dirs  r,
+   owner @{HOME}/.config/mimeapps.list   r,
+-  owner @{HOME}/.local/share/applications/               r,
+-  owner @{HOME}/.local/share/applications/*.desktop      r,
+-  owner @{HOME}/.local/share/applications/defaults.list  r,
+-  owner @{HOME}/.local/share/applications/mimeapps.list  r,
+-  owner @{HOME}/.local/share/applications/mimeinfo.cache r,
+-  owner @{HOME}/.local/share/icons/     r,
+-  owner @{HOME}/.local/share/icons/**   r,
+-  owner @{HOME}/.local/share/mime/      r,
+-  owner @{HOME}/.local/share/mime/**    r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}applications/               r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}applications/*.desktop      r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}applications/defaults.list  r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}applications/mimeapps.list  r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}applications/mimeinfo.cache r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}icons/     r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}icons/**   r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}mime/      r,
++  owner @{HOME}/.local/share/{,flatpak/exports/share/}mime/**    r,

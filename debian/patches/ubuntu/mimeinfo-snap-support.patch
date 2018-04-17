@@ -1,0 +1,18 @@
+Author: Jamie Strandboge <jamie@canonical.com>
+Description: allow reading /var/lib/snapd/desktop/applications/*.desktop and
+ /var/lib/snapd/desktop/applications/mimeinfo.cache
+Bug-Ubuntu: https://launchpad.net/bugs/1712039
+Index: apparmor-2.12/profiles/apparmor.d/abstractions/freedesktop.org
+===================================================================
+--- apparmor-2.12.orig/profiles/apparmor.d/abstractions/freedesktop.org
++++ apparmor-2.12/profiles/apparmor.d/abstractions/freedesktop.org
+@@ -13,7 +13,9 @@
+   /{usr,usr/local,var/lib/flatpak/exports}/share/applications/{*/,}               r,
+   /{usr,usr/local,var/lib/flatpak/exports}/share/applications/{*/,}defaults.list  r,
+   /{usr,usr/local,var/lib/flatpak/exports}/share/applications/{*/,}mimeinfo.cache r,
++  /var/lib/snapd/desktop/applications/mimeinfo.cache r,
+   /{usr,usr/local,var/lib/flatpak/exports}/share/applications/{*/,}*.desktop      r,
++  /var/lib/snapd/desktop/applications/{,*.desktop} r,
+   /usr/share/icons/               r,
+   /usr/share/icons/**             r,
+   /usr/share/pixmaps/             r,

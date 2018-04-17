@@ -1,0 +1,36 @@
+From: Didier Roche <didier.roche@canonical.com>
+Date: Wed, 11 Apr 2018 10:25:10 +0000
+Subject: add communitheme snap support
+Bug-Ubuntu: https://launchpad.net/bugs/1762983
+
+Forwarded: no
+Index: apparmor-debian.git/profiles/apparmor.d/abstractions/freedesktop.org
+===================================================================
+--- apparmor-debian.git.orig/profiles/apparmor.d/abstractions/freedesktop.org
++++ apparmor-debian.git/profiles/apparmor.d/abstractions/freedesktop.org
+@@ -25,6 +25,10 @@
+   /var/lib/flatpak/exports/share/icons/   r,
+   /var/lib/flatpak/exports/share/icons/** r,
+ 
++  # communitheme snap
++  /snap/communitheme/*/share/icons/   r,
++  /snap/communitheme/*/share/icons/** r,
++
+   # this should probably go elsewhere
+   /{usr,var/lib/flatpak/exports}/share/mime/** r,
+ 
+Index: apparmor-debian.git/profiles/apparmor.d/abstractions/gnome
+===================================================================
+--- apparmor-debian.git.orig/profiles/apparmor.d/abstractions/gnome
++++ apparmor-debian.git/profiles/apparmor.d/abstractions/gnome
+@@ -27,6 +27,10 @@
+   /usr/share/themes/              r,
+   /usr/share/themes/**            r,
+ 
++  # communitheme snap
++  /snap/communitheme/*/share/themes/   r,
++  /snap/communitheme/*/share/themes/** r,
++
+   # for gnome 1 applications
+   /etc/orbitrc                    r,
+ 

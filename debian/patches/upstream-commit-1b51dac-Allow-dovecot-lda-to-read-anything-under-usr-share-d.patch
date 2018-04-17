@@ -1,0 +1,24 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Sat, 20 Jan 2018 06:20:38 +0000
+Subject: [PATCH] Allow dovecot-lda to read anything under
+ /usr/share/dovecot/protocols.d/.
+
+On current Debian sid it needs to read
+/usr/share/dovecot/protocols.d/imapd.protocol, which is not surprising given it
+already needed read access to /usr/share/dovecot/protocols.d/.
+---
+ profiles/apparmor.d/usr.lib.dovecot.dovecot-lda | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/profiles/apparmor.d/usr.lib.dovecot.dovecot-lda b/profiles/apparmor.d/usr.lib.dovecot.dovecot-lda
+index 2041d5b..083a886 100644
+--- a/profiles/apparmor.d/usr.lib.dovecot.dovecot-lda
++++ b/profiles/apparmor.d/usr.lib.dovecot.dovecot-lda
+@@ -31,6 +31,7 @@
+   /usr/lib/dovecot/dovecot-lda mrix,
+   /usr/sbin/sendmail Cx,
+   /usr/share/dovecot/protocols.d/ r,
++  /usr/share/dovecot/protocols.d/** r,
+ 
+   # Site-specific additions and overrides. See local/README for details.
+   #include <local/usr.lib.dovecot.dovecot-lda>

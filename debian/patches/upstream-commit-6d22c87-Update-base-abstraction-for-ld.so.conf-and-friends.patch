@@ -1,0 +1,25 @@
+From: Vincas Dargis <vindrg@gmail.com>
+Date: Wed, 24 Jan 2018 19:43:45 +0200
+Subject: Update base abstraction for ld.so.conf and friends.
+
+Fix denies for latest Thunderbird and Firefox on Debian Sid due to
+missing access to /etc/ld.so.conf and /etc/ld.so.conf.d/*.
+
+Origin: upstream, https://gitlab.com/apparmor/apparmor/commit/6d22c871bfb17da7620efab4ad5c41960d1efd41
+---
+ profiles/apparmor.d/abstractions/base | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/profiles/apparmor.d/abstractions/base b/profiles/apparmor.d/abstractions/base
+index fa24975..ee19e1b 100644
+--- a/profiles/apparmor.d/abstractions/base
++++ b/profiles/apparmor.d/abstractions/base
+@@ -54,6 +54,8 @@
+   # ld.so.cache and ld are used to load shared libraries; they are best
+   # available everywhere
+   /etc/ld.so.cache               mr,
++  /etc/ld.so.conf                r,
++  /etc/ld.so.conf.d/{,*.conf}    r,
+   /etc/ld.so.preload             r,
+   /{usr/,}lib{,32,64}/ld{,32,64}-*.so   mr,
+   /{usr/,}lib/@{multiarch}/ld{,32,64}-*.so    mr,

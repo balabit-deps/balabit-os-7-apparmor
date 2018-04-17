@@ -1,0 +1,24 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Wed, 7 Feb 2018 07:57:55 +0000
+Subject: dnsmasq profile: allow chown capability
+
+dnsmasq on Debian sid now chown's its PID file.
+
+Bug-Debian: https://bugs.debian.org/889806
+Forwarded: https://gitlab.com/apparmor/apparmor/merge_requests/68
+---
+ profiles/apparmor.d/usr.sbin.dnsmasq | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/profiles/apparmor.d/usr.sbin.dnsmasq b/profiles/apparmor.d/usr.sbin.dnsmasq
+index a53bf4e..eadb771 100644
+--- a/profiles/apparmor.d/usr.sbin.dnsmasq
++++ b/profiles/apparmor.d/usr.sbin.dnsmasq
+@@ -17,6 +17,7 @@
+   #include <abstractions/dbus>
+   #include <abstractions/nameservice>
+ 
++  capability chown,
+   capability net_bind_service,
+   capability setgid,
+   capability setuid,

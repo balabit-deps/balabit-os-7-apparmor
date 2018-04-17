@@ -1,0 +1,110 @@
+From: Tyler Hicks <tyhicks@canonical.com>
+Date: Mon, 29 Jan 2018 12:26:43 +0000
+Subject: adjust aa-remove-unknown to use /lib/apparmor/functions instead of
+ the upstream /lib/apparmor/rc.apparmor.functions
+
+The upstream utility uses the upstream /lib/apparmor/rc.apparmor.functions
+file, that's not shipped in Debian/Ubuntu. This patch adapts it to use
+the /lib/apparmor/functions file shipped as part of the Debian/Ubuntu
+packaging instead.
+Forwarded: not-needed
+---
+ utils/aa-remove-unknown | 64 +++++++++++++++++++++++--------------------------
+ 1 file changed, 30 insertions(+), 34 deletions(-)
+
+diff --git a/utils/aa-remove-unknown b/utils/aa-remove-unknown
+index d3bd914..ee836fb 100644
+--- a/utils/aa-remove-unknown
++++ b/utils/aa-remove-unknown
+@@ -15,9 +15,9 @@
+ #    along with this program. If not, see <http://www.gnu.org/licenses/>.
+ # ----------------------------------------------------------------------
+ 
+-APPARMOR_FUNCTIONS=/lib/apparmor/rc.apparmor.functions
++APPARMOR_FUNCTIONS=/lib/apparmor/functions
+ APPARMORFS=/sys/kernel/security/apparmor
+-PROFILES="${APPARMORFS}/profiles"
++PROFILES_IFACE="${APPARMORFS}/profiles"
+ REMOVE="${APPARMORFS}/.remove"
+ 
+ DRY_RUN=0
+@@ -57,13 +57,13 @@ elif [ "$#" -eq 1 ] ; then
+ fi
+ 
+ 
+-# We can't use a -r test here because while $PROFILES is world-readable,
++# We can't use a -r test here because while $PROFILES_IFACE is world-readable,
+ # apparmorfs may still return EACCES from open()
+ #
+ # We have to do this check because error checking awk's getline() below is
+ # tricky and, as is, results in an infinite loop when apparmorfs returns an
+ # error from open().
+-if ! IFS= read line < "$PROFILES" ; then
++if ! IFS= read line < "$PROFILES_IFACE" ; then
+ 	echo "ERROR: Unable to read apparmorfs profiles file" 1>&2
+ 	exit 1
+ elif [ ! -w "$REMOVE" ] ; then
+@@ -73,37 +73,33 @@ fi
+ 
+ # Clean out running profiles not associated with the current profile
+ # set, excluding the libvirt dynamically generated profiles.
+-# Note that we reverse sort the list of profiles to remove to
+-# ensure that child profiles (e.g. hats) are removed before the
+-# parent. We *do* need to remove the child profile and not rely
+-# on removing the parent profile when the profile has had its
+-# child profile names changed.
+-profiles_names_list | awk '
+-BEGIN {
+-  while (getline < "'${PROFILES}'" ) {
+-    str = sub(/ \((enforce|complain)\)$/, "", $0);
+-    if (match($0, /^libvirt-[0-9a-f\-]+$/) == 0)
+-      arr[$str] = $str
+-  }
+-}
++aa_configured=$(mktemp -t aa-XXXXXX)
++configured_profile_names > "$aa_configured"
++if [ "$?" -ne 0 ] ; then
++	echo "ERROR: Unable to enumerate the known profiles" 1>&2
++	rm -f "$aa_configured" "$aa_loaded"
++	exit 1
++fi
+ 
+-{ if (length(arr[$0]) > 0) { delete arr[$0] } }
++aa_loaded=$(mktemp -t aa-XXXXXX)
++running_profile_names > "$aa_loaded" || true
++if [ "$?" -ne 0 ] ; then
++	echo "ERROR: Unable to enumerate the running profiles" 1>&2
++	rm -f "$aa_configured" "$aa_loaded"
++	exit 1
++fi
+ 
+-END {
+-  for (key in arr)
+-    if (length(arr[key]) > 0) {
+-      printf("%s\n", arr[key])
+-    }
+-}
+-' | LC_COLLATE=C sort -r | \
+-	while IFS= read profile ; do
+-		if [ "$DRY_RUN" -ne 0 ]; then
+-			echo "Would remove '${profile}'"
+-		else
+-			echo "Removing '${profile}'"
+-			echo -n "$profile" > "${REMOVE}"
+-		fi
+-	done
++LC_COLLATE=C comm -2 -3 "$aa_loaded" "$aa_configured" | while read profile ; do
++	if [ "$DRY_RUN" -ne 0 ]; then
++		echo "Would remove '${profile}'"
++	else
++		echo "Removing '${profile}'"
++		unload_profile "$profile"
++	fi
++done
++ret="$?"
++
++rm -f "$aa_configured" "$aa_loaded"
+ 
+ # will not catch all errors, but still better than nothing
+-exit $?
++exit $ret

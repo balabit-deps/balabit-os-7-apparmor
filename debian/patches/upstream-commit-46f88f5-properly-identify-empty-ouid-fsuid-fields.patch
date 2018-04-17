@@ -1,0 +1,39 @@
+From 46f88f5f0d24a8862ce5a4debd0a7b188584bf3c Mon Sep 17 00:00:00 2001
+From: Tyler Hicks <tyhicks@canonical.com>
+Date: Wed, 7 Mar 2018 14:25:22 +0000
+Subject: [PATCH] utils: Properly identify empty ouid/fsuid fields in logs
+
+libaalogparse uses (unsigned long) -1 to indicate that a log entry does
+not contain ouid and/or fsuid fields. The utils logparser was
+incorrectly using 2^64 - 1 to detect such a condition but that wasn't
+sufficient for 32 bit environments.
+
+Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+---
+ utils/apparmor/logparser.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/utils/apparmor/logparser.py b/utils/apparmor/logparser.py
+index 0e74c3f..d21271f 100644
+--- a/utils/apparmor/logparser.py
++++ b/utils/apparmor/logparser.py
+@@ -12,6 +12,7 @@
+ #    GNU General Public License for more details.
+ #
+ # ----------------------------------------------------------------------
++import ctypes
+ import os
+ import re
+ import sys
+@@ -118,7 +119,7 @@ class ReadLog:
+         ev['protocol'] = event.net_protocol
+         ev['sock_type'] = event.net_sock_type
+ 
+-        if event.ouid != 18446744073709551615:  # 2^64 - 1
++        if event.ouid != ctypes.c_ulong(-1).value:  # ULONG_MAX
+             ev['fsuid'] = event.fsuid
+             ev['ouid'] = event.ouid
+ 
+-- 
+2.7.4
+

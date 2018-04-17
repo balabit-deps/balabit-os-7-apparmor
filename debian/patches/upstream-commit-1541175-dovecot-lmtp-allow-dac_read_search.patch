@@ -1,0 +1,23 @@
+From: Christian Boltz <apparmor@cboltz.de>
+Date: Thu, 18 Jan 2018 18:15:43 +0100
+Subject: [PATCH] dovecot/lmtp: allow dac_read_search
+
+Fixes https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=887591
+
+Bug-Debian: https://bugs.debian.org/887591
+---
+ profiles/apparmor.d/usr.lib.dovecot.lmtp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/profiles/apparmor.d/usr.lib.dovecot.lmtp b/profiles/apparmor.d/usr.lib.dovecot.lmtp
+index d30a4cb..436435f 100644
+--- a/profiles/apparmor.d/usr.lib.dovecot.lmtp
++++ b/profiles/apparmor.d/usr.lib.dovecot.lmtp
+@@ -20,6 +20,7 @@
+   #include <abstractions/ssl_keys>
+ 
+   capability dac_override,
++  capability dac_read_search,
+   capability setuid,
+ 
+   @{DOVECOT_MAILSTORE}/ rw,

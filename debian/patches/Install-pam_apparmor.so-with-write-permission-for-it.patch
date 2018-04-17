@@ -1,0 +1,42 @@
+From: intrigeri <intrigeri@boum.org>
+Date: Fri, 19 Jan 2018 08:22:35 +0000
+Subject: [PATCH] Install pam_apparmor.so with write permission for its owner.
+
+I could not find the reason why the upstream Makefile has been installing it
+with permissions 555: this predates the migration from SVN.
+
+Regardless, at least on Debian and derivatives, dh_fixperms has been
+changing these permissions to 755 forever so it was causing problems,
+likely we would know about it by now.
+
+The initial motivation for this change is supporting rootless builds on Debian
+and derivatives, also known as "Rules-Requires-Root:  no":
+
+ - /usr/share/doc/dpkg-dev/rootless-builds.txt* on a Debian system
+   with a sufficiently recent dpkg-dev installed
+ - https://nthykier.wordpress.com/2017/10/29/building-packages-without-fakeroot/
+ - https://lists.debian.org/debian-devel/2017/10/msg00520.html
+
+With this change applied upstream, Debian-based downstreams don't need to adjust
+their debian/rules to make this work with "Rules-Requires-Root: no":
+
+	chrpath -d $(CURDIR)/debian/tmp/lib/security/pam_apparmor.so
+
+Origin: upstream, https://gitlab.com/apparmor/apparmor/commit/6ab19ea82fe57a69dfb0f3af92e8f5892e3fe9f4
+---
+ changehat/pam_apparmor/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/changehat/pam_apparmor/Makefile b/changehat/pam_apparmor/Makefile
+index be5e73c..61b949c 100644
+--- a/changehat/pam_apparmor/Makefile
++++ b/changehat/pam_apparmor/Makefile
+@@ -82,7 +82,7 @@ SECDIR ?= ${DESTDIR}/lib/security
+ .PHONY: install
+ install: $(NAME).so
+ 	install -m 755 -d $(SECDIR)
+-	install -m 555 $(NAME).so $(SECDIR)/
++	install -m 755 $(NAME).so $(SECDIR)/
+ 	
+ .PHONY: clean
+ clean:

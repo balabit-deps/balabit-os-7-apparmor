@@ -1,0 +1,20 @@
+From: Kees Cook <kees@debian.org>
+Date: Mon, 29 Jan 2018 12:26:43 +0000
+Subject: The group for reading /var/log/kern.log is "adm", not "admin".
+
+Bug-Debian: https://bugs.debian.org/660078
+===================================================================
+---
+ utils/notify.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/utils/notify.conf b/utils/notify.conf
+index 82a0067..e273ee4 100644
+--- a/utils/notify.conf
++++ b/utils/notify.conf
+@@ -12,4 +12,4 @@
+ show_notifications="yes"
+ 
+ # Only people in use_group can use aa-notify
+-use_group="admin"
++# use_group="adm"
