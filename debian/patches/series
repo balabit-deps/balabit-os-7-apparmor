@@ -20,3 +20,4 @@ ubuntu/profiles-grant-access-to-systemd-resolved.patch
 ubuntu/add-chromium-browser.patch
 ubuntu/communitheme-snap-support.patch
 ubuntu/mimeinfo-snap-support.patch
+ubuntu/lp1788929+1794848.patch
